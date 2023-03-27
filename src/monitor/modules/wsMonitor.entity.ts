@@ -1,7 +1,7 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
-@Entity('ws_monitor')
-export class WSMonitor {
+@Entity({name: 'ws_monitor', schema: 'web_server'})
+export class WSMonitorEntity {
     @PrimaryGeneratedColumn()
     date_created: Date;
 
