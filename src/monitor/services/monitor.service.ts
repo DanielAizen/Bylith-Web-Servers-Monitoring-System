@@ -6,35 +6,41 @@ import { Repository } from 'typeorm';
 import { WSMonitorEntity } from '../modules/wsMonitor.entity';
 import { WebServiceMonitor } from '../modules/wsMonitor.interface';
 import { Request } from 'express';
-import { WSHealthStatusEntity } from 'src/health-status/modules/wsHealthStatus.entity';
+import { portSet } from 'src/main';
 
 @Injectable()
 export class MonitorService {
-  private portSet: Set<number>;
   private runningApps: Map<number, INestApplication>;
   constructor(
     @InjectRepository(WSMonitorEntity)
     private readonly monitorServiceReposetory: Repository<WSMonitorEntity>,
   ) {
-    this.portSet = new Set<number>();
     this.runningApps = new Map<number, INestApplication>();
   }
 
   async createNewServer(serverInfo: WebServiceMonitor, req: Request) {
     //update if port already exists based on watermark add res
-    const newApp = await NestFactory.create(AppModule);
-    serverInfo.port = serverInfo.port
-      ? serverInfo.port
-      : this.generateRandomPort();
-    this.portSet.add(serverInfo.port);
-    this.runningApps.set(serverInfo.port, newApp);
-    serverInfo.date_created = serverInfo.date_created
-      ? serverInfo.date_created
-      : new Date();
+    serverInfo.port =
+      serverInfo.port && !portSet.has(serverInfo.port)
+        ? serverInfo.port
+        : this.generateRandomPort();
+    portSet.add(serverInfo.port);
     serverInfo.watermark = new Date();
     serverInfo.http_url = req.url;
-
-    await newApp.listen(serverInfo.port);
+    try {
+      const newApp = await NestFactory.create(AppModule);
+      this.runningApps.set(serverInfo.port, newApp);
+      serverInfo.date_created = serverInfo.date_created
+        ? serverInfo.date_created
+        : new Date();
+      await newApp.listen(serverInfo.port);
+      serverInfo.status = 200;
+    } catch (error) {
+      serverInfo.date_created = serverInfo.date_created
+        ? serverInfo.date_created
+        : new Date();
+      serverInfo.status = 500;
+    }
     return await this.monitorServiceReposetory.save(serverInfo);
   }
 
@@ -46,21 +52,15 @@ export class MonitorService {
     let serverToUpdate = await this.monitorServiceReposetory.findOne({
       where: { port: portNum },
     });
-    const serverToClose: INestApplication = this.runningApps.get(portNum);
-    await serverToClose.close();
 
     serverToUpdate.date_created = new Date();
     serverToUpdate.http_url = req.url;
     serverToUpdate = { ...serverToUpdate, ...serverInfo };
 
-    serverToClose.init();
-    serverToClose.listen(portNum);
-
     return this.monitorServiceReposetory
       .createQueryBuilder()
       .update(WSMonitorEntity)
       .set(serverToUpdate)
-      .where(`port=${portNum}`)
       .execute();
   }
 
@@ -99,13 +99,22 @@ export class MonitorService {
       `select wsm.*, wshs.status 
       from web_server.ws_monitor as wsm 
       right join web_server.ws_health_status as wshs 
-      on wsm.port = wshs.port_id;`
+      on wsm.port = wshs.port_id;`,
     );
+  }
+
+  async insertNewRecord(serverInfo: WebServiceMonitor) {
+    await this.monitorServiceReposetory
+      .createQueryBuilder()
+      .insert()
+      .into(WSMonitorEntity)
+      .values(serverInfo)
+      .execute();
   }
 
   generateRandomPort() {
     let newPort = Math.floor(Math.random() * 9000) + 1000;
-    while (this.portSet.has(newPort)) {
+    while (portSet.has(newPort)) {
       newPort++;
     }
     return newPort;

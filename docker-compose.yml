@@ -1,0 +1,25 @@
+version: '3.9'
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=bylith
+      - POSTGRES_PASSWORD=bylith
+      - POSTGRES_DB=web_server
+    ports:
+      - "5432:5432"
+    volumes:
+      - data:/var/lib/postgres/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=aiz.dani@gmail.com
+      - PGADMIN_DEFAULT_PASSWORD=pg1234
+      - PG_LISTEN_PORT=3000
+    ports:
+      - "3000:3000"
+
+volumes:
+  data:
+  

@@ -13,6 +13,11 @@ export class MonitorController {
     return this.monitorService.createNewServer(server, req);
   }
 
+  @Post('insert')
+  insertNewRecord(@Body() server: WebServiceMonitor){
+    return this.monitorService.insertNewRecord(server)
+  }
+
   //edit
   @Put('edit/:port')
   editServerInformation(
@@ -44,6 +49,7 @@ export class MonitorController {
   getAllServers() {
     return this.monitorService.listAllServers();
   }
+
 }
 
 

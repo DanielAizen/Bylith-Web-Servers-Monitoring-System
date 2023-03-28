@@ -1,15 +1,13 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
-import { ServerStatus } from "./wsHealthStatus.interface";
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity({name: 'ws_healthStatus', schema: 'web_server'})
+@Entity({ name: 'ws_health_status', schema: 'web_server' })
 export class WSHealthStatusEntity {
+  @PrimaryGeneratedColumn()
+  id: number;
+  
+  @Column()
+  port_id: number;
 
-    @PrimaryGeneratedColumn()
-    port_id: number;
-
-    @Column()
-    status: ServerStatus;
-
-    @Column()
-    num_checks: number;
+  @Column()
+  status: number;
 }
