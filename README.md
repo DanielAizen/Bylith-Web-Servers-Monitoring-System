@@ -1,6 +1,9 @@
 ## Description
-I've create a web server monitoring system while using NestJs. There's a postman .json file attached for your convinence, in addition I've created a dockerfile and docker-compose 
+I've create a web server monitoring system while using NestJs. There's a postman .json file attached for your convinence, in addition I've created a dockerfile and docker-compose. 
+I've completed the assigment without the 'Bonus'.
 
+### Known Bugs
+I had an issue with the multiple updates. I tried to resolve the issue but couldn't find a solution.
 
 ## Installation
 
