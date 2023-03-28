@@ -1,8 +1,8 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 import { ServerStatus } from "./wsHealthStatus.interface";
 
-@Entity('ws_healthStatus')
-export class WSHealthStatus {
+@Entity({name: 'ws_healthStatus', schema: 'web_server'})
+export class WSHealthStatusEntity {
 
     @PrimaryGeneratedColumn()
     port_id: number;

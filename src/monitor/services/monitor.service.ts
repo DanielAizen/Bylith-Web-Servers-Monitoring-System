@@ -6,15 +6,18 @@ import { Repository } from 'typeorm';
 import { WSMonitorEntity } from '../modules/wsMonitor.entity';
 import { WebServiceMonitor } from '../modules/wsMonitor.interface';
 import { Request } from 'express';
+import { WSHealthStatusEntity } from 'src/health-status/modules/wsHealthStatus.entity';
 
 @Injectable()
 export class MonitorService {
   private portSet: Set<number>;
+  private runningApps: Map<number, INestApplication>;
   constructor(
     @InjectRepository(WSMonitorEntity)
     private readonly monitorServiceReposetory: Repository<WSMonitorEntity>,
   ) {
     this.portSet = new Set<number>();
+    this.runningApps = new Map<number, INestApplication>();
   }
 
   async createNewServer(serverInfo: WebServiceMonitor, req: Request) {
@@ -24,6 +27,7 @@ export class MonitorService {
       ? serverInfo.port
       : this.generateRandomPort();
     this.portSet.add(serverInfo.port);
+    this.runningApps.set(serverInfo.port, newApp);
     serverInfo.date_created = serverInfo.date_created
       ? serverInfo.date_created
       : new Date();
@@ -34,27 +38,23 @@ export class MonitorService {
     return await this.monitorServiceReposetory.save(serverInfo);
   }
 
-  async listAllServers() {
-    return await this.monitorServiceReposetory
-      .createQueryBuilder()
-      .select('ws_monitor.port')
-      .from(WSMonitorEntity, 'ws_monitor')
-      .distinctOn(['ws_monitor.port'])
-      .getMany();
-  }
-
   async updateServer(
     portNum: number,
     serverInfo: WebServiceMonitor,
     req: Request,
   ) {
-
     let serverToUpdate = await this.monitorServiceReposetory.findOne({
       where: { port: portNum },
     });
+    const serverToClose: INestApplication = this.runningApps.get(portNum);
+    await serverToClose.close();
+
     serverToUpdate.date_created = new Date();
     serverToUpdate.http_url = req.url;
     serverToUpdate = { ...serverToUpdate, ...serverInfo };
+
+    serverToClose.init();
+    serverToClose.listen(portNum);
 
     return this.monitorServiceReposetory
       .createQueryBuilder()
@@ -62,6 +62,45 @@ export class MonitorService {
       .set(serverToUpdate)
       .where(`port=${portNum}`)
       .execute();
+  }
+
+  async deleteServer(portNum: number) {
+    const serverToClose: INestApplication = this.runningApps.get(portNum);
+    await serverToClose.close();
+    return await this.monitorServiceReposetory
+      .createQueryBuilder()
+      .delete()
+      .from(WSMonitorEntity)
+      .where(`port=${portNum}`)
+      .execute();
+  }
+
+  async getServer(portNum: number) {
+    return await this.monitorServiceReposetory.findOne({
+      where: { port: portNum },
+      order: {
+        date_created: 'DESC',
+      },
+    });
+  }
+
+  async getSpecificServer(portNum: number) {
+    return await this.monitorServiceReposetory.find({
+      where: { port: portNum },
+      order: {
+        date_created: 'DESC',
+      },
+      take: 10,
+    });
+  }
+
+  async listAllServers() {
+    return await this.monitorServiceReposetory.query(
+      `select wsm.*, wshs.status 
+      from web_server.ws_monitor as wsm 
+      right join web_server.ws_health_status as wshs 
+      on wsm.port = wshs.port_id;`
+    );
   }
 
   generateRandomPort() {
@@ -72,14 +111,3 @@ export class MonitorService {
     return newPort;
   }
 }
-
-
-/**
- * select * from web_server.ws_monitor;
-insert into web_server.ws_monitor(port, name, http_url) values (3000, 'test', '127.0.0.1');
-
-delete from web_server.ws_monitor where port !=3000;
-
-select distinct port from web_server.ws_monitor;
-
- */

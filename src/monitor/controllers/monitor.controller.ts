@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Req } from '@nestjs/common';
 import { WebServiceMonitor } from '../modules/wsMonitor.interface';
 import { MonitorService } from '../services/monitor.service';
 import { Request } from 'express';
@@ -22,10 +22,25 @@ export class MonitorController {
   ) {
     return this.monitorService.updateServer(portToChange, server, req);
   }
+
   //delete
+  @Delete('delete/:port')
+  deleteAndShutDownServer(@Param('port') portToDelete: number){
+    return this.monitorService.deleteServer(portToDelete)
+  }
 
   //list
-  @Get('listAll')
+  @Get('listOne/:port')
+  getOneServer(@Param('port') portNum: number) {
+    return this.monitorService.getServer(portNum)
+  }
+
+  @Get('listAll/:port')
+  getServerRequests(@Param('port') portNum: number) {
+    return this.monitorService.getSpecificServer(portNum)
+  }
+
+  @Get()
   getAllServers() {
     return this.monitorService.listAllServers();
   }
