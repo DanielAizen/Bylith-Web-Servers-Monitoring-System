@@ -1,0 +1,238 @@
+{
+	"info": {
+		"_postman_id": "4f0ae608-70e9-4122-8bb4-f96eb660a0ce",
+		"name": "Bylith",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "18358667"
+	},
+	"item": [
+		{
+			"name": "Init",
+			"item": [
+				{
+					"name": "Sanity check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:3000",
+							"host": [
+								"localhost"
+							],
+							"port": "3000"
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Health Status",
+			"item": [
+				{
+					"name": "health status worker",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:3000/health-status",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"health-status"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Monitor servers",
+			"item": [
+				{
+					"name": "Create Server -3001",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"port\": 3001,\r\n    \"name\": \"test via postamn\",\r\n    \"http_url\": \"localhost\"\r\n}"
+						},
+						"url": {
+							"raw": "localhost:3000/monitor/create",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"monitor",
+								"create"
+							],
+							"query": [
+								{
+									"key": "",
+									"value": null,
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Insert new record",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"health check\",\r\n    \"status\": 0\r\n}"
+						},
+						"url": {
+							"raw": "localhost:3000/monitor/insert",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"monitor",
+								"insert"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Server",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"testing put method 3002 again with log\"\r\n}"
+						},
+						"url": {
+							"raw": "localhost:3000/monitor/edit/3001",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"monitor",
+								"edit",
+								"3001"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete server",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "localhost:3000/monitor/delete/3001",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"monitor",
+								"delete",
+								"3001"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Return specific server",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:3000/monitor/listOne/3001",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"monitor",
+								"listOne",
+								"3001"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get specific port 10 last records",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:3000/monitor/listAll/:port",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"monitor",
+								"listAll",
+								":port"
+							],
+							"variable": [
+								{
+									"key": "port",
+									"value": "3001"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List all Servers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:3000/monitor/",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"monitor",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

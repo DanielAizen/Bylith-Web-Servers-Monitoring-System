@@ -5,10 +5,6 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MonitorModule } from './monitor/monitor.module';
 import { HealthStatusModule } from './health-status/health-status.module';
-import { PrometheusModule } from '@willsoto/nestjs-prometheus';
-import { makeGaugeProvider } from "@willsoto/nestjs-prometheus";
-import { APP_INTERCEPTOR } from '@nestjs/core';
-import { LoggingInterceptor } from './logging.interceptor';
 
 @Module({
   imports: [
@@ -24,26 +20,8 @@ import { LoggingInterceptor } from './logging.interceptor';
     }),
     MonitorModule,
     HealthStatusModule,
-    // PrometheusModule.register({
-    //   defaultMetrics: {
-    //     enabled: true
-    //   }
-    // }),
   ],
   controllers: [AppController],
-  providers: [
-    AppService,
-    // {
-    //   provide: APP_INTERCEPTOR,
-    //   useClass: LoggingInterceptor,
-    // },
-    // makeGaugeProvider({
-    //   name: 'latency',
-    //   help: 'calculates the server latency',
-    //   collect() {
-
-    //   }
-    // })
-  ],
+  providers: [AppService],
 })
 export class AppModule {}
